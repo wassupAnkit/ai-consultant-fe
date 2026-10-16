@@ -1,0 +1,21 @@
+node_modules
+.next
+.git
+.gitignore
+.idea
+.vscode
+.DS_Store
+*.tsbuildinfo
+
+# secrets / local env — never bake into the image
+.env
+.env.*
+!.env.example
+
+# not needed in the image
+helm
+buildspec-prod.yaml
+Dockerfile
+.dockerignore
+README.md
+supabase

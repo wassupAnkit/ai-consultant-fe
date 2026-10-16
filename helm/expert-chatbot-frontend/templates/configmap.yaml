@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app }}-configmap
+  namespace: {{ .Values.namespace }}
+data:
+  PORT: "{{ .Values.port }}"
+  # Git SHA of the running build (CI writes repository.tag); used for release tagging in traces.
+  APP_RELEASE: "{{ .Values.repository.tag }}"
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

@@ -1,0 +1,63 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+.pnpm-store/*
+
+# testing
+/coverage
+.nyc_output
+*.lcov
+allure-results
+allure-report
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# next-pwa / serwist generated service worker
+**/public/sw.js
+**/public/sw.js.map
+**/public/workbox-*.js
+**/public/workbox-*.js.map
+**/public/worker-*.js
+**/public/worker-*.js.map
+**/public/swe-worker-*.js
+**/public/swe-worker-*.js.map
+
+# misc
+.DS_Store
+*.pem
+.vscode
+.idea
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+
+# env files (never commit real values; .env.example is tracked intentionally)
+.env
+.env*.local
+.env.tmp
+.env.test
+.env.staging
+.env.production
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# turbo
+.turbo
+
+# eslint
+.eslintcache

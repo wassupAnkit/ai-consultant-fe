@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.app }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app }}
+      # Deliberately no instrumentation.opentelemetry.io/inject-nodejs: the
+      # operator injects via NODE_OPTIONS --require, which the Bun runtime does
+      # not honour. LLM calls are already traced through Langfuse.
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        # Numeric uid so the kubelet can verify non-root (image USER is a name).
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsUser }}
+      containers:
+        - name: {{ .Values.repository.name }}
+          image: "{{ .Values.repository.image }}/{{ .Values.repository.name }}:{{ .Values.repository.tag }}"
+          imagePullPolicy: {{ .Values.repository.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.port }}
+          securityContext:
+            allowPrivilegeEscalation: false
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.app }}-configmap
+            {{- if .Values.externalSecret.enabled }}
+            # Credentials sourced from AWS Secrets Manager and synced into this
+            # Secret by the secrets-store CSI driver.
+            - secretRef:
+                name: {{ .Values.externalSecret.name }}
+            {{- end }}
+          {{- if .Values.externalSecret.enabled }}
+          volumeMounts:
+            # Mounting the SPC volume is what triggers the CSI driver to fetch
+            # prod/expert-chatbot-frontend/app and sync the Secret consumed above.
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          {{- end }}
+
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.probes.startup.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.probes.startup.path }}
+              port: {{ .Values.port }}
+            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.startup.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
+          {{- end }}
+
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path }}
+              port: {{ .Values.port }}
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          {{- end }}
+
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: {{ .Values.port }}
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          {{- end }}
+      {{- if .Values.externalSecret.enabled }}
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Values.externalSecret.name }}
+      {{- end }}

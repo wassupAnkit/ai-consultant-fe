@@ -1,0 +1,188 @@
+/*
+ * The in-app guide: driver.js spotlight popovers in Expert's tokens, and the welcome guide's
+ * animated scenes. Every animation is off under prefers-reduced-motion (final state shown).
+ */
+
+/* ---------- Spotlight tour (driver.js) ---------- */
+
+.driver-popover.edge-tour {
+  max-width: 340px;
+  min-width: 260px;
+  padding: 18px 18px 14px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 16px;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: var(--shadow-lg);
+  font-family: inherit;
+  animation: edge-tour-pop 0.32s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+}
+.driver-popover.edge-tour .driver-popover-title {
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: hsl(var(--heading));
+  padding-right: 22px;
+}
+.driver-popover.edge-tour .driver-popover-description {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+}
+.driver-popover.edge-tour .driver-popover-footer {
+  margin-top: 14px;
+  align-items: center;
+}
+.driver-popover.edge-tour .driver-popover-progress-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: hsl(var(--muted-foreground));
+}
+.driver-popover.edge-tour .driver-popover-navigation-btns button {
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-shadow: none;
+  padding: 6px 14px;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.15s;
+}
+.driver-popover.edge-tour .driver-popover-navigation-btns button:hover {
+  border-color: hsl(var(--primary) / 0.5);
+}
+.driver-popover.edge-tour .driver-popover-next-btn {
+  border-color: hsl(var(--primary)) !important;
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  box-shadow: var(--shadow-cta);
+}
+.driver-popover.edge-tour .driver-popover-next-btn:hover {
+  background: hsl(var(--primary-strong)) !important;
+  transform: translateY(-1px);
+}
+.driver-popover.edge-tour .driver-popover-close-btn {
+  color: hsl(var(--muted-foreground));
+  top: 8px;
+  right: 8px;
+}
+.driver-popover.edge-tour .driver-popover-close-btn:hover {
+  color: hsl(var(--foreground));
+}
+/* The arrow is a CSS triangle drawn with one coloured border per side. */
+.driver-popover.edge-tour .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: hsl(var(--popover)); }
+.driver-popover.edge-tour .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: hsl(var(--popover)); }
+.driver-popover.edge-tour .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: hsl(var(--popover)); }
+.driver-popover.edge-tour .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: hsl(var(--popover)); }
+
+/* The step number badge rendered into the title. */
+.edge-tour-step {
+  display: inline-flex;
+  height: 22px;
+  min-width: 22px;
+  margin-right: 8px;
+  padding: 0 6px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: hsl(var(--primary-tint));
+  color: hsl(var(--primary-strong));
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: 2px;
+}
+
+/* A soft breathing ring on the highlighted control. */
+.edge-tour-active {
+  animation: edge-tour-glow 1.8s ease-in-out infinite;
+  border-radius: 12px;
+}
+
+@keyframes edge-tour-pop {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes edge-tour-glow {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.45); }
+  50% { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
+}
+
+/* ---------- Welcome guide scenes ---------- */
+
+.tour-scene [data-a] {
+  animation-delay: var(--d, 0s);
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.tour-scene [data-a="up"] { animation-name: tour-up; animation-duration: 0.55s; }
+.tour-scene [data-a="pop"] { animation-name: tour-pop; animation-duration: 0.5s; animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+.tour-scene [data-a="left"] { animation-name: tour-left; animation-duration: 0.6s; }
+.tour-scene [data-a="right"] { animation-name: tour-right; animation-duration: 0.6s; }
+.tour-scene [data-a="fade"] { animation-name: tour-fade; animation-duration: 0.6s; }
+.tour-scene [data-a="type"] { animation-name: tour-type; animation-duration: var(--t, 1.2s); animation-timing-function: steps(28, end); }
+.tour-scene [data-a="fill"] { animation-name: tour-fill; animation-duration: var(--t, 1.4s); }
+.tour-scene [data-a="strike"] { animation-name: tour-strike; animation-duration: 0.5s; }
+.tour-scene [data-a="scan"] { animation: tour-scan 2.2s ease-in-out var(--d, 0s) infinite; }
+.tour-scene [data-a="pulse"] { animation: tour-pulse 1.6s ease-out var(--d, 0s) infinite; }
+.tour-scene [data-a="orbit"] { animation: tour-orbit 14s linear infinite; }
+.tour-scene [data-a="counter-orbit"] { animation: tour-orbit 14s linear infinite reverse; }
+.tour-scene [data-a="float"] { animation: tour-float 3.2s ease-in-out var(--d, 0s) infinite; }
+.tour-scene [data-a="caret"] { animation: tour-caret 1s steps(1) infinite; }
+.tour-scene [data-a="press"] { animation: tour-press 0.6s ease-out var(--d, 0s) both; }
+
+@keyframes tour-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes tour-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes tour-left { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes tour-right { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+@keyframes tour-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tour-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes tour-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes tour-strike { from { opacity: 0.4; text-decoration-color: transparent; } to { opacity: 0.55; text-decoration-color: currentColor; } }
+@keyframes tour-scan { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(var(--h, 120px)); opacity: 0; } }
+@keyframes tour-pulse { 0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); } 100% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); } }
+@keyframes tour-orbit { to { transform: rotate(360deg); } }
+@keyframes tour-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes tour-caret { 50% { opacity: 0; } }
+@keyframes tour-press { 0% { transform: scale(1); } 40% { transform: scale(0.94); } 100% { transform: scale(1); } }
+
+.tour-slide-enter { animation: tour-slide 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.tour-slide-enter-back { animation: tour-slide-back 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes tour-slide { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes tour-slide-back { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Arrival prompt ("Would you like a quick guide?") ---------- */
+
+.edge-guide-prompt { animation: edge-prompt-in 0.55s cubic-bezier(0.2, 0.9, 0.25, 1.1) both; }
+.edge-guide-prompt-sheen { background-size: 200% 100%; animation: edge-prompt-sheen 3.5s linear infinite; }
+.edge-guide-prompt-ring { animation: edge-tour-glow 2.2s ease-in-out infinite; }
+.edge-guide-prompt-spark { animation: edge-prompt-spark 2.4s ease-in-out infinite; }
+
+@keyframes edge-prompt-in { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes edge-prompt-sheen { from { background-position: 0% 0; } to { background-position: 200% 0; } }
+@keyframes edge-prompt-spark { 0%, 100% { opacity: 0.4; transform: scale(0.8) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(20deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .edge-guide-prompt,
+  .edge-guide-prompt-sheen,
+  .edge-guide-prompt-ring,
+  .edge-guide-prompt-spark,
+  .driver-popover.edge-tour,
+  .edge-tour-active,
+  .tour-slide-enter,
+  .tour-slide-enter-back,
+  .tour-scene [data-a] {
+    animation: none !important;
+  }
+  .tour-scene [data-a] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  .tour-scene [data-a="scan"] { display: none; }
+}

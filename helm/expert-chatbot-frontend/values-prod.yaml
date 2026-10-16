@@ -1,0 +1,72 @@
+# ===========================================================================
+# PRODUCTION — ap-southeast-2 (Sydney), EKS hb-prod-apse2. Overlay on values.yaml.
+#
+# * NO CREDENTIALS IN THIS FILE. Secrets arrive from AWS Secrets Manager
+#   prod/expert-chatbot-frontend/app through the secrets-store CSI driver
+#   (SecretProviderClass expert-chatbot-frontend-secrets, defined in
+#   heubert-infra/environments/prod/app-secrets.tf).
+# * IMAGE TAG IS A GIT SHA, NEVER "latest". CodeBuild (buildspec-prod.yaml)
+#   commits the tag to this file on the gitops-prod branch; ArgoCD syncs it.
+# * Stateless Next.js server (state lives in the Edge backend);
+#   replicaCount may be raised once the first release has baked.
+# ===========================================================================
+
+namespace: production
+environment: prod
+replicaCount: 1
+
+repository:
+  image: <AWS_ACCOUNT_ID>.dkr.ecr.ap-southeast-2.amazonaws.com
+  name: expert-chatbot-frontend-prod
+  # Replaced per build by CI (git SHA). The placeholder is intentionally
+  # invalid so an un-templated deploy fails loudly.
+  tag: REPLACED_BY_CI
+  pullPolicy: IfNotPresent
+
+dnsName: edge.heubertapp.com
+
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    # Load-balancer-level annotations MUST be byte-identical on every ingress
+    # in the shared-alb group or the ALB controller rejects the group
+    # (heubert-infra/environments/prod/admin-access.tf). inbound-cidrs is the
+    # admin/office allowlist the whole prod estate carries pre-cutover.
+    alb.ingress.kubernetes.io/group.name: shared-alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-2:<AWS_ACCOUNT_ID>:certificate/<ACM_CERT_ID>
+    alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:ap-southeast-2:<AWS_ACCOUNT_ID>:regional/webacl/heubert-alb-waf/<WAF_WEBACL_ID>
+    alb.ingress.kubernetes.io/inbound-cidrs: <OFFICE_ADMIN_CIDR_ALLOWLIST>
+    # Target-group level (per ingress). /api/health is unauthenticated by design.
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health
+
+config:
+  NODE_ENV: production
+  HOSTNAME: 0.0.0.0
+  # Backend (Edge API) base URL, used server-side only (config/env.ts).
+  EDGE_API_URL: https://ai-consultant.heubertapp.com
+  # Passport / national ID upload in the composer. Turn on only together with the backend's
+  # STUDENT_DOCS_ENABLED (and its secrets); read at request time, no rebuild needed.
+  DOCUMENT_UPLOAD_ENABLED: "false"
+
+externalSecret:
+  enabled: true
+  name: expert-chatbot-frontend-secrets
+
+# Next.js SSR sizing (moxie/events-frontend rows in (heubert-infra/environments/prod/SIZING.md).
+resources:
+  requests:
+    cpu: 100m
+    memory: 384Mi
+  limits:
+    cpu: 300m
+    memory: 512Mi
+
+# With one replica a PDB of minAvailable: 1 would block every node drain.
+# Re-enable together with replicaCount >= 2.
+pdb:
+  enabled: false

@@ -1,0 +1,66 @@
+# Production build — Sydney (ap-southeast-2). The generic app buildspec plus
+# NEXT_PUBLIC_* build args for Next.js (see env.secrets-manager below):
+# build the image, tag with the git SHA, push to the app's Sydney ECR repo,
+# then bump that tag in the gitops-prod branch's values-prod.yaml. ArgoCD
+# deploys from there. No :latest, no kubectl rollout restart.
+#
+# All per-repo values arrive as CodeBuild env vars (see environments/prod/cicd.tf):
+#   ECR_REGISTRY, ECR_REPO, REPO_SLUG, VALUES_FILE, GITOPS_BRANCH, AWS_DEFAULT_REGION
+# BITBUCKET_TOKEN (workspace token) is used only for the gitops push-back.
+version: 0.2
+
+env:
+  variables:
+    DOCKERFILE: Dockerfile
+    GIT_USER_NAME: codebuild
+    GIT_USER_EMAIL: ci@heubert.com
+    BITBUCKET_WORKSPACE: heubert
+  secrets-manager:
+    BITBUCKET_TOKEN: "bitbucket/auth/token:BITBUCKET_WORKSPACE_TOKEN"
+    # Next.js inlines NEXT_PUBLIC_* at build time. The Google OAuth client id is
+    # public but kept out of git; empty selects open mode (no login).
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: "prod/expert-chatbot-frontend/app:NEXT_PUBLIC_GOOGLE_CLIENT_ID"
+
+phases:
+  pre_build:
+    commands:
+      - set -Eeuo pipefail
+      - dnf install -y git jq >/dev/null 2>&1 || yum install -y git jq >/dev/null 2>&1 || true
+      - curl -sL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_arm64" -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+      - IMAGE_TAG="${CODEBUILD_RESOLVED_SOURCE_VERSION:0:12}"
+      - echo "Building ${ECR_REPO}:${IMAGE_TAG} (repo ${REPO_SLUG})"
+      - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+  build:
+    commands:
+      - |
+        if aws ecr describe-images --repository-name "$ECR_REPO" --image-ids imageTag="$IMAGE_TAG" --region "$AWS_DEFAULT_REGION" >/dev/null 2>&1; then
+          echo "Image ${ECR_REPO}:${IMAGE_TAG} already exists — skipping build."
+          echo "true" > /tmp/skip_push
+        else
+          docker build -f "$DOCKERFILE" -t "${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}" \
+            --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID="$NEXT_PUBLIC_GOOGLE_CLIENT_ID" .
+        fi
+  post_build:
+    commands:
+      - |
+        if [ ! -f /tmp/skip_push ]; then
+          docker push "${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}"
+        fi
+      # Update the gitops-prod branch's image tag — the commit ArgoCD watches.
+      - |
+        set -Eeuo pipefail
+        WORKDIR=$(mktemp -d)
+        if ! git clone --depth 1 --branch "$GITOPS_BRANCH" \
+             "https://x-token-auth:${BITBUCKET_TOKEN}@bitbucket.org/${BITBUCKET_WORKSPACE}/${REPO_SLUG}.git" "$WORKDIR" 2>/dev/null; then
+          echo "NOTE: gitops-prod branch missing or no write access — image is pushed to ECR; skipping tag commit."
+          exit 0
+        fi
+        cd "$WORKDIR"
+        yq -i ".repository.tag = \"${IMAGE_TAG}\"" "$VALUES_FILE"
+        git config user.name "$GIT_USER_NAME"; git config user.email "$GIT_USER_EMAIL"
+        if git diff --quiet; then
+          echo "tag already ${IMAGE_TAG}"
+        else
+          git add "$VALUES_FILE"; git commit -m "ci(prod): ${REPO_SLUG} -> ${IMAGE_TAG}"
+          git push origin "$GITOPS_BRANCH" || echo "NOTE: gitops push failed (token likely read-only) — tag NOT committed."
+        fi

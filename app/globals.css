@@ -1,0 +1,393 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens, in two layers like the Expert Education website
+ * (eevs-website/src/app/(frontend)/globals.css, spec docs/superpowers/specs/2026-06-17-eevs-brand-tokens-design.md).
+ *
+ * Layer 1 — the raw brand scale as hex (`--ee-*`), for brand moments that have no semantic
+ * meaning (a teal accent, the navy login panel). Layer 2 — shadcn's semantic tokens, written as
+ * HSL triplets so Tailwind's opacity modifiers (`bg-primary/10`) keep working on Tailwind v3.
+ * Components use layer 2; layer 1 is documentation and the source of the numbers below.
+ */
+@layer base {
+  :root {
+    /* ─── Layer 1: EEVS brand scale (hex, reference only) ─────────────────── */
+    --ee-navy-900: #063263;
+    --ee-navy-700: #334770;
+    --ee-blue: #1877f2;
+    --ee-blue-600: #0f63d6;
+    --ee-blue-300: #5da1ff;
+    --ee-blue-tint: #eaf2fe;
+    --ee-teal: #00cdc4;
+    --ee-teal-600: #00ada5;
+    --ee-teal-tint: #e0faf8;
+    --ee-amber: #ffbd36;
+    --ee-amber-tint: #fff4dc;
+    --ee-green: #00ad00;
+    --ee-green-tint: #e6f6e6;
+    --ee-gray-700: #444444;
+    --ee-gray-600: #585858;
+    --ee-gray-500: #686868;
+    --ee-gray-400: #98a4b5;
+    --ee-gray-200: #d9e2ee;
+    --ee-gray-100: #eef3fa;
+    --ee-gray-50: #f6f9fd;
+
+    /* ─── Layer 2: semantic tokens — LIGHT (HSL triplets) ─────────────────── */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 13%; /* #202020 — answer text */
+    --heading: 221 39% 11%; /* #111827 */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
+    --primary: 214 89% 52%; /* #1877F2 brand blue */
+    --primary-foreground: 0 0% 100%;
+    --primary-strong: 215 87% 45%; /* #0F63D6 — hover */
+    --primary-tint: 216 91% 96%; /* #EAF2FE — user bubble, active row, chips */
+    --secondary: 220 37% 32%; /* #334770 navy-700 */
+    --secondary-foreground: 0 0% 100%;
+    --navy: 212 89% 21%; /* #063263 */
+    --navy-foreground: 0 0% 100%;
+    --teal: 177 100% 40%; /* #00CDC4 — CRM evidence */
+    --teal-foreground: 212 89% 21%;
+    --teal-tint: 175 72% 93%; /* #E0FAF8 */
+    /* The consultant's own Google account (Gmail, Drive): the site's navy-700, so it reads as
+       "yours" beside the blue of the knowledge base and the teal of the CRM without a new hue. */
+    --workspace: 220 37% 32%; /* #334770 */
+    --workspace-foreground: 0 0% 100%;
+    --workspace-strong: 220 42% 30%;
+    --workspace-tint: 222 45% 94%;
+    --muted: 210 43% 97%; /* #F5F8FB */
+    --muted-foreground: 0 0% 41%; /* #686868 */
+    --sidebar: 214 64% 98%; /* #F6F9FD */
+    --accent: 216 91% 96%; /* hover surfaces = the blue tint, not grey */
+    --accent-foreground: 212 89% 21%;
+    /* Hairlines use gray-200 (#D9E2EE); the site's #B2B8BF border is kept for form fields only —
+       it is too heavy for the dozens of hairlines a chat draws. */
+    --border: 214 38% 89%;
+    --input: 212 9% 72%;
+    --ring: 214 89% 52%;
+    --destructive: 0 72% 51%; /* #DC2626 */
+    --destructive-foreground: 0 0% 100%;
+    --success: 120 100% 34%; /* #00AD00 */
+    --success-tint: 120 36% 93%;
+    --warning: 40 100% 61%; /* #FFBD36 */
+    --warning-foreground: 34 60% 24%;
+    --warning-tint: 40 100% 93%; /* #FFF4DC — "Not in the knowledge base" callouts */
+    --chart-1: 214 89% 52%;
+    --chart-2: 177 100% 40%;
+    --chart-3: 212 89% 21%;
+    --chart-4: 40 100% 61%;
+    --chart-5: 220 37% 32%;
+    --radius: 0.75rem;
+
+    /* Fonts (families come from next/font in app/fonts.ts). */
+    --font-sans: var(--font-general-sans);
+    --font-heading: var(--font-serif);
+    --font-display: var(--font-serif);
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    /* Elevation — navy-tinted, from the site. */
+    --shadow-sm: 0 2px 8px rgba(6, 50, 99, 0.08);
+    --shadow-md: 0 12px 28px -10px rgba(6, 50, 99, 0.18);
+    --shadow-lg: 0 24px 50px -16px rgba(6, 50, 99, 0.28);
+    --shadow-cta: 0 4px 12px rgba(24, 119, 242, 0.2);
+  }
+
+  /* ─── Layer 2: semantic tokens — DARK ──────────────────────────────────── */
+  .dark {
+    --background: 225 21% 7%; /* #0F1117 */
+    --foreground: 210 43% 97%;
+    --heading: 210 43% 97%;
+    --card: 225 28% 14%; /* #1A1F2E */
+    --card-foreground: 219 15% 81%;
+    --popover: 225 28% 14%;
+    --popover-foreground: 210 43% 97%;
+    --primary: 214 89% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-strong: 214 89% 66%;
+    --primary-tint: 216 60% 16%;
+    --secondary: 222 28% 22%;
+    --secondary-foreground: 210 43% 97%;
+    --navy: 212 89% 21%;
+    --navy-foreground: 0 0% 100%;
+    --teal: 177 90% 42%;
+    --teal-foreground: 175 70% 78%;
+    --teal-tint: 177 60% 14%;
+    --workspace: 224 38% 58%;
+    --workspace-foreground: 0 0% 100%;
+    --workspace-strong: 222 60% 82%;
+    --workspace-tint: 224 30% 19%;
+    --muted: 222 28% 16%; /* #1E2535 */
+    --muted-foreground: 215 8% 62%;
+    --sidebar: 225 24% 10%;
+    --accent: 216 60% 16%;
+    --accent-foreground: 210 43% 97%;
+    --border: 225 16% 22%;
+    --input: 225 16% 28%;
+    --ring: 214 89% 58%;
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 120 60% 48%;
+    --success-tint: 120 30% 14%;
+    --warning: 40 100% 61%;
+    --warning-foreground: 40 90% 80%;
+    --warning-tint: 40 60% 14%;
+    --chart-1: 214 89% 58%;
+    --chart-2: 177 90% 42%;
+    --chart-3: 210 43% 97%;
+    --chart-4: 40 100% 61%;
+    --chart-5: 222 28% 60%;
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 12px 28px -10px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 24px 50px -16px rgba(0, 0, 0, 0.6);
+    --shadow-cta: 0 4px 12px rgba(24, 119, 242, 0.35);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
+  button {
+    cursor: pointer;
+  }
+  /* Thin, token-coloured scrollbars everywhere (three scrolling panes sit side by side). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: hsl(var(--border));
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.6);
+  }
+  /* Chrome/Safari repaint autofilled fields in their own colours; defer that out of reach. */
+  input:-webkit-autofill,
+  textarea:-webkit-autofill {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    caret-color: hsl(var(--foreground));
+    transition: background-color 100000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  /*
+   * Answer typography — the website's `prose-eevs` theme (eevs-website/src/app/(frontend)/prose.css)
+   * mapped onto the Typography plugin's variables, plus the serif heading face. Body copy stays
+   * in the sans; the serif is for headings only, as on claude.ai.
+   */
+  .prose-edge {
+    --tw-prose-body: hsl(var(--foreground));
+    --tw-prose-headings: hsl(var(--heading));
+    --tw-prose-lead: hsl(var(--muted-foreground));
+    --tw-prose-links: hsl(var(--primary-strong));
+    --tw-prose-bold: hsl(var(--heading));
+    --tw-prose-counters: hsl(var(--muted-foreground));
+    --tw-prose-bullets: hsl(var(--primary));
+    --tw-prose-hr: hsl(var(--border));
+    --tw-prose-quotes: hsl(var(--foreground));
+    --tw-prose-quote-borders: hsl(var(--primary));
+    --tw-prose-captions: hsl(var(--muted-foreground));
+    --tw-prose-code: hsl(var(--heading));
+    --tw-prose-pre-code: hsl(var(--foreground));
+    --tw-prose-pre-bg: hsl(var(--muted));
+    --tw-prose-th-borders: hsl(var(--border));
+    --tw-prose-td-borders: hsl(var(--border));
+    --tw-prose-invert-body: hsl(var(--foreground));
+    --tw-prose-invert-headings: hsl(var(--heading));
+    --tw-prose-invert-lead: hsl(var(--muted-foreground));
+    --tw-prose-invert-links: hsl(var(--primary-strong));
+    --tw-prose-invert-bold: hsl(var(--heading));
+    --tw-prose-invert-counters: hsl(var(--muted-foreground));
+    --tw-prose-invert-bullets: hsl(var(--primary));
+    --tw-prose-invert-hr: hsl(var(--border));
+    --tw-prose-invert-quotes: hsl(var(--foreground));
+    --tw-prose-invert-quote-borders: hsl(var(--primary));
+    --tw-prose-invert-captions: hsl(var(--muted-foreground));
+    --tw-prose-invert-code: hsl(var(--heading));
+    --tw-prose-invert-pre-code: hsl(var(--foreground));
+    --tw-prose-invert-pre-bg: hsl(var(--muted));
+    --tw-prose-invert-th-borders: hsl(var(--border));
+    --tw-prose-invert-td-borders: hsl(var(--border));
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .prose-edge :where(h1, h2, h3, h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+  .prose-edge :where(h1):not(:where([class~="not-prose"] *)) {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose-edge :where(h2):not(:where([class~="not-prose"] *)) {
+    font-size: 1.3125rem;
+    line-height: 1.3;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .prose-edge :where(h3):not(:where([class~="not-prose"] *)) {
+    font-size: 1.125rem;
+    line-height: 1.4;
+    margin-top: 1.25rem;
+    margin-bottom: 0.375rem;
+  }
+  .prose-edge :where(h4):not(:where([class~="not-prose"] *)) {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  .prose-edge :where(p):not(:where([class~="not-prose"] *)) {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose-edge :where(ul, ol):not(:where([class~="not-prose"] *)) {
+    margin-top: 0.625rem;
+    margin-bottom: 0.625rem;
+    padding-left: 1.375rem;
+  }
+  .prose-edge :where(li):not(:where([class~="not-prose"] *)) {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  .prose-edge :where(li > p):not(:where([class~="not-prose"] *)) {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  .prose-edge :where(strong):not(:where([class~="not-prose"] *)) {
+    font-weight: 600;
+  }
+  .prose-edge :where(code):not(:where(pre *)) {
+    font-size: 0.875em;
+    padding: 0.1em 0.35em;
+    border-radius: 0.375rem;
+    background: hsl(var(--muted));
+    border: 1px solid hsl(var(--border));
+  }
+  .prose-edge :where(code)::before,
+  .prose-edge :where(code)::after {
+    content: none;
+  }
+  .prose-edge :where(pre):not(:where([class~="not-prose"] *)) {
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    font-size: 0.8125rem;
+  }
+  .prose-edge :where(table):not(:where([class~="not-prose"] *)) {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .prose-edge :where(th):not(:where([class~="not-prose"] *)) {
+    background: hsl(var(--muted));
+    color: hsl(var(--heading));
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  .prose-edge :where(td):not(:where([class~="not-prose"] *)) {
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
+  }
+  .prose-edge :where(blockquote):not(:where([class~="not-prose"] *)) {
+    font-style: normal;
+    font-weight: 400;
+    color: hsl(var(--muted-foreground));
+  }
+  .prose-edge :where(blockquote p:first-of-type)::before,
+  .prose-edge :where(blockquote p:last-of-type)::after {
+    content: none;
+  }
+  .prose-edge :where(a):not(:where([class~="not-prose"] *)) {
+    font-weight: 500;
+    text-decoration-color: hsl(var(--primary) / 0.4);
+    text-underline-offset: 0.15em;
+  }
+  .prose-edge :where(a):not(:where([class~="not-prose"] *)):hover {
+    text-decoration-color: hsl(var(--primary));
+  }
+  .prose-edge > :first-child {
+    margin-top: 0;
+  }
+  .prose-edge > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* A blinking bar after the last block while tokens arrive. */
+  .streaming-caret > :last-child::after {
+    content: "";
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    margin-left: 0.15em;
+    vertical-align: text-bottom;
+    border-radius: 1px;
+    background: hsl(var(--primary));
+    animation: caret-blink 1s steps(2, start) infinite;
+  }
+
+  /* The signature Expert corner: top-right and bottom-left rounded, the other two square. */
+  .rounded-overlap-cta-sm {
+    border-radius: 0 10px 0 10px;
+  }
+  .rounded-overlap-cta {
+    border-radius: 0 20px 0 20px;
+  }
+}
+
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Decorative motion is non-essential. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .streaming-caret > :last-child::after {
+    animation: none;
+  }
+}
